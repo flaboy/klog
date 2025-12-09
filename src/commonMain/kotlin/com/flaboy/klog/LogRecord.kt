@@ -6,3 +6,4 @@ data class LogRecord(
     val message: String
 )
 
+

@@ -1,5 +1,9 @@
 package com.flaboy.klog
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import okio.Path.Companion.toPath
 
 /**
@@ -27,29 +31,53 @@ class KLogger private constructor(
      * Log info level message.
      */
     fun log(tag: String, message: String) {
-        platformLogger.log(tag, message)
-        ringLogger.append("[$tag] $message", LEVEL_INFO)
+        val formattedMessage = formatLogMessage(tag, message)
+        platformLogger.log(tag, formattedMessage)
+        ringLogger.append(formattedMessage, LEVEL_INFO)
     }
     
     /**
      * Log warning level message.
      */
     fun logW(tag: String, message: String) {
-        platformLogger.logW(tag, message)
-        ringLogger.append("WARNING [$tag] $message", LEVEL_WARNING)
+        val formattedMessage = formatLogMessage(tag, message, "WARNING")
+        platformLogger.logW(tag, formattedMessage)
+        ringLogger.append(formattedMessage, LEVEL_WARNING)
     }
     
     /**
      * Log error level message.
      */
     fun logE(tag: String, message: String, throwable: Throwable? = null) {
-        platformLogger.logE(tag, message, throwable)
         val errorMsg = if (throwable != null) {
             "$message: ${throwable.message}"
         } else {
             message
         }
-        ringLogger.append("ERROR [$tag] $errorMsg", LEVEL_ERROR)
+        val formattedMessage = formatLogMessage(tag, errorMsg, "ERROR")
+        platformLogger.logE(tag, formattedMessage, throwable)
+        ringLogger.append(formattedMessage, LEVEL_ERROR)
+    }
+    
+    private fun formatLogMessage(tag: String, message: String, level: String = ""): String {
+        val timestamp = formatTimestamp(Clock.System.now())
+        return if (level.isEmpty()) {
+            "[$timestamp] [$tag] $message"
+        } else {
+            "[$timestamp] $level [$tag] $message"
+        }
+    }
+    
+    private fun formatTimestamp(instant: Instant): String {
+        val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+        val year = dateTime.date.year
+        val month = dateTime.date.monthNumber.toString().padStart(2, '0')
+        val day = dateTime.date.dayOfMonth.toString().padStart(2, '0')
+        val hour = dateTime.time.hour.toString().padStart(2, '0')
+        val minute = dateTime.time.minute.toString().padStart(2, '0')
+        val second = dateTime.time.second.toString().padStart(2, '0')
+        val nanosecond = dateTime.time.nanosecond.toString().padStart(9, '0').take(3)
+        return "$year-$month-$day $hour:$minute:$second.$nanosecond"
     }
     
     /**

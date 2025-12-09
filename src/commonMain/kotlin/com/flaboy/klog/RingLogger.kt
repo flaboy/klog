@@ -19,7 +19,7 @@ import okio.Path
 class RingLogger(
     private val path: Path,
     private val config: LogConfig,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM
+    private val fileSystem: FileSystem = getDefaultFileSystem()
 ) {
     private val handle: FileHandle
 

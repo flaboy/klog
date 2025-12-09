@@ -12,6 +12,12 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
+    // Desktop Native targets
+    macosArm64()
+    macosX64()
+    linuxX64()
+    mingwX64()
+
     sourceSets {
             val commonMain by getting {
                 dependencies {
@@ -25,19 +31,56 @@ kotlin {
                 implementation("com.squareup.okio:okio-fakefilesystem:3.9.0")
             }
         }
-        val androidMain by getting
+        val androidMain by getting {
+            dependsOn(commonMain)
+        }
         val androidUnitTest by getting {
             dependencies {
                 implementation("com.squareup.okio:okio-fakefilesystem:3.9.0")
             }
         }
+        val jvmMain by getting {
+            dependsOn(commonMain)
+        }
+        
         val jvmTest by getting {
             dependencies {
                 implementation("com.squareup.okio:okio-fakefilesystem:3.9.0")
             }
         }
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
+        // iOS targets share common implementation
+        val iosMain by creating {
+            dependsOn(commonMain)
+        }
+        
+        val iosArm64Main by getting {
+            dependsOn(iosMain)
+        }
+        
+        val iosSimulatorArm64Main by getting {
+            dependsOn(iosMain)
+        }
+        
+        // Native targets share common implementation
+        val nativeMain by creating {
+            dependsOn(commonMain)
+        }
+        
+        val macosArm64Main by getting {
+            dependsOn(nativeMain)
+        }
+        
+        val macosX64Main by getting {
+            dependsOn(nativeMain)
+        }
+        
+        val linuxX64Main by getting {
+            dependsOn(nativeMain)
+        }
+        
+        val mingwX64Main by getting {
+            dependsOn(nativeMain)
+        }
     }
 }
 

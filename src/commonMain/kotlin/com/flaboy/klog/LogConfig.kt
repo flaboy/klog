@@ -6,6 +6,7 @@ package com.flaboy.klog
  */
 data class LogConfig(
     val maxBytes: Int,
-    val formatVersion: Int = 1
+    val formatVersion: Int = 1,
+    val dedupEnabled: Boolean = true
 )
 
